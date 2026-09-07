@@ -46,6 +46,21 @@ namespace AppliManageAppForWpf
         {
             _dragStartPoint = e.GetPosition(null);
             _isDragging = false;
+            if (FreePlacement)
+            {
+                // begin canvas drag candidate
+                var btn = sender as Button;
+                if (btn != null)
+                {
+                    _canvasDraggingItem = btn.DataContext as AppItem;
+                    if (_canvasDraggingItem != null)
+                    {
+                        _canvasDragStartPoint = e.GetPosition(this.AppList);
+                        _canvasDragItemStartX = _canvasDraggingItem.X;
+                        _canvasDragItemStartY = _canvasDraggingItem.Y;
+                    }
+                }
+            }
         }
 
         private void AppItem_PreviewMouseMove(object sender, MouseEventArgs e)
@@ -57,14 +72,44 @@ namespace AppliManageAppForWpf
                 var pos = e.GetPosition(null);
                 if (!_isDragging && (Math.Abs(pos.X - _dragStartPoint.X) > SystemParameters.MinimumHorizontalDragDistance || Math.Abs(pos.Y - _dragStartPoint.Y) > SystemParameters.MinimumVerticalDragDistance))
                 {
-                    _isDragging = true;
-                    var item = btn.DataContext as AppItem;
-                    if (item != null)
+                    if (FreePlacement)
                     {
-                        DragDrop.DoDragDrop(btn, item, DragDropEffects.Move);
+                        // start moving on canvas
+                        _isCanvasDragging = true;
+                    }
+                    else
+                    {
+                        _isDragging = true;
+                        var item = btn.DataContext as AppItem;
+                        if (item != null)
+                        {
+                            DragDrop.DoDragDrop(btn, item, DragDropEffects.Move);
+                        }
                     }
                 }
+                // during canvas drag, update position
+                if (_isCanvasDragging && _canvasDraggingItem != null)
+                {
+                    var cur = e.GetPosition(this.AppList);
+                    var dx = cur.X - _canvasDragStartPoint.X;
+                    var dy = cur.Y - _canvasDragStartPoint.Y;
+                    _canvasDraggingItem.X = _canvasDragItemStartX + dx;
+                    _canvasDraggingItem.Y = _canvasDragItemStartY + dy;
+                    // refresh binding by forcing item update
+                    this.AppList.Items.Refresh();
+                }
             }
+        }
+
+        private void AppItem_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isCanvasDragging && _canvasDraggingItem != null)
+            {
+                // finalize position
+                _isCanvasDragging = false;
+                SaveSettings();
+            }
+            _canvasDraggingItem = null;
         }
 
         private void AppItem_Drop(object sender, DragEventArgs e)
@@ -102,6 +147,15 @@ namespace AppliManageAppForWpf
         private double BackgroundLineSpacing = 0;
         private bool BackgroundFontBold = false;
         private bool BackgroundFontItalic = false;
+        private string IconPlacement = "Center";
+        private bool FreePlacement = false;
+
+        // canvas drag state for free placement
+        private bool _isCanvasDragging = false;
+        private Point _canvasDragStartPoint;
+        private double _canvasDragItemStartX;
+        private double _canvasDragItemStartY;
+        private AppItem _canvasDraggingItem = null;
 
         public MainWindow()
         {
@@ -268,9 +322,35 @@ namespace AppliManageAppForWpf
                             Icon = GetIconImageSource(f)
                         };
 
-                        // 重複がなければ追加
+                        // 重複がなければ追加 (noop patch)
                         if (!AppItems.Any(a => string.Equals(a.Path, item.Path, StringComparison.OrdinalIgnoreCase)))
                         {
+                            // set initial placement based on TextPosition or center
+                            double w = this.Width, h = this.Height;
+                            switch ((BackgroundTextPosition ?? "Center").ToLowerInvariant())
+                            {
+                                case "top":
+                                    item.X = w / 2 - (IconSizeValue / 2);
+                                    item.Y = 40;
+                                    break;
+                                case "bottom":
+                                    item.X = w / 2 - (IconSizeValue / 2);
+                                    item.Y = h - 120;
+                                    break;
+                                case "left":
+                                    item.X = 40;
+                                    item.Y = h / 2 - (IconSizeValue / 2);
+                                    break;
+                                case "right":
+                                    item.X = w - 120;
+                                    item.Y = h / 2 - (IconSizeValue / 2);
+                                    break;
+                                default:
+                                    item.X = w / 2 - (IconSizeValue / 2);
+                                    item.Y = h / 2 - (IconSizeValue / 2);
+                                    break;
+                            }
+
                             AppItems.Add(item);
                             SaveSettings();
                         }
@@ -428,6 +508,9 @@ namespace AppliManageAppForWpf
                 /*lineSpacing*/BackgroundLineSpacing,
                 /*fontBold*/BackgroundFontBold,
                 /*fontItalic*/BackgroundFontItalic
+                ,
+                /*iconPlacement*/ (AppItems.Count>0? "Center" : BackgroundTextPosition),
+                /*freePlacement*/ false
             ) { Owner = this };
             if (dlg.ShowDialog() == true)
             {
@@ -458,6 +541,9 @@ namespace AppliManageAppForWpf
                 BackgroundLineSpacing = dlg.ResultLineSpacing;
                 BackgroundFontBold = dlg.ResultFontBold;
                 BackgroundFontItalic = dlg.ResultFontItalic;
+                // placement settings
+                IconPlacement = dlg.ResultIconPlacement ?? IconPlacement;
+                FreePlacement = dlg.ResultFreePlacement;
 
                 // apply icon size to the Window dependency property so bindings update
                 try { this.IconSize = IconSizeValue; this.Resources["IconSize"] = IconSizeValue; } catch { }
@@ -470,6 +556,9 @@ namespace AppliManageAppForWpf
                 AppList.Visibility = ListMode ? Visibility.Collapsed : Visibility.Visible;
                 // AppListVertical may not exist in older builds; guard
                 try { AppListVertical.Visibility = ListMode ? Visibility.Visible : Visibility.Collapsed; } catch { }
+
+                // switch items panel for free placement
+                ApplyItemsPanelForPlacement();
 
                 SaveSettings();
             }
@@ -603,6 +692,8 @@ namespace AppliManageAppForWpf
                     LineSpacing = BackgroundLineSpacing,
                     FontBold = BackgroundFontBold,
                     FontItalic = BackgroundFontItalic,
+                    IconPlacement = IconPlacement,
+                    FreePlacement = FreePlacement,
                     Apps = AppItems.Select(a => new AppEntry { Name = a.Name, Path = a.Path }).ToList()
                 };
                 var xs = new XmlSerializer(typeof(SettingsData));
@@ -642,9 +733,13 @@ namespace AppliManageAppForWpf
                         {
                             foreach (var e in data.Apps)
                             {
-                                AppItems.Add(new AppItem { Name = e.Name, Path = e.Path, Icon = GetIconImageSource(e.Path) });
+                                AppItems.Add(new AppItem { Name = e.Name, Path = e.Path, Icon = GetIconImageSource(e.Path), X = (e.X), Y = (e.Y) });
                             }
                         }
+                        // restore placement settings
+                        IconPlacement = data.IconPlacement ?? IconPlacement;
+                        FreePlacement = data.FreePlacement;
+                        ApplyItemsPanelForPlacement();
                     }
                 }
             }
@@ -672,6 +767,8 @@ namespace AppliManageAppForWpf
             public double LineSpacing { get; set; }
             public bool FontBold { get; set; }
             public bool FontItalic { get; set; }
+            public string IconPlacement { get; set; }
+            public bool FreePlacement { get; set; }
             public List<AppEntry> Apps { get; set; }
         }
 
@@ -679,6 +776,29 @@ namespace AppliManageAppForWpf
         {
             public string Name { get; set; }
             public string Path { get; set; }
+            // optional placement info
+            public double X { get; set; }
+            public double Y { get; set; }
+        }
+
+        private void ApplyItemsPanelForPlacement()
+        {
+            try
+            {
+                if (FreePlacement)
+                {
+                    // switch to canvas panel
+                    var template = this.Resources["CanvasPanel"] as ItemsPanelTemplate;
+                    if (template != null) AppList.ItemsPanel = template;
+                }
+                else
+                {
+                    // switch back to wrap panel
+                    var template = this.Resources["WrapPanelTemplate"] as ItemsPanelTemplate;
+                    if (template != null) AppList.ItemsPanel = template;
+                }
+            }
+            catch { }
         }
 
         private class AppItem
@@ -686,6 +806,9 @@ namespace AppliManageAppForWpf
             public string Name { get; set; }
             public string Path { get; set; }
             public BitmapSource Icon { get; set; }
+            // position for free placement
+            public double X { get; set; }
+            public double Y { get; set; }
         }
     }
 }

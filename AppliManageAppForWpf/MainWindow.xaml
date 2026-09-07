@@ -13,8 +13,15 @@
     <Grid AllowDrop="True" Drop="Grid_Drop" DragOver="Grid_DragOver">
         <Grid.Resources>
             <sys:Double x:Key="IconSize">48</sys:Double>
+            <ItemsPanelTemplate x:Key="CanvasPanel">
+                <Canvas />
+            </ItemsPanelTemplate>
+            <ItemsPanelTemplate x:Key="WrapPanelTemplate">
+                <WrapPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
             <DataTemplate x:Key="AppItemTemplate">
                 <Button Click="AppItem_Click" Tag="{Binding Path}" Margin="8" Width="72" Height="88" Background="Transparent" BorderBrush="Transparent"
+                        Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}"
                         PreviewMouseLeftButtonDown="AppItem_PreviewMouseLeftButtonDown"
                         PreviewMouseMove="AppItem_PreviewMouseMove"
                         AllowDrop="True"
@@ -63,6 +70,7 @@
         <!-- アプリ一覧を表示する領域 -->
         <!-- Grid (wrap) view -->
         <ItemsControl x:Name="AppList" HorizontalAlignment="Center" VerticalAlignment="Center" ItemTemplate="{StaticResource AppItemTemplate}">
+            <!-- Placeholder: keep this ItemsControl so it can be swapped at runtime -->
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel Orientation="Horizontal" />

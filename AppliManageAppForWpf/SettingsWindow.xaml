@@ -1,7 +1,7 @@
 <Window x:Class="AppliManageAppForWpf.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="設定" Height="520" Width="715" WindowStartupLocation="CenterOwner" ResizeMode="CanResize">
+        Title="設定" Height="620" Width="930" WindowStartupLocation="CenterOwner" ResizeMode="CanResize">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -59,6 +59,17 @@
                 <TextBox x:Name="OpacityBox" Width="60" />
                 <TextBlock Text="アイコンサイズ:" Width="90" VerticalAlignment="Center" Margin="8,0,0,0"/>
                 <TextBox x:Name="IconSizeBox" Width="60" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,4">
+                <TextBlock Text="アイコン配置:" Width="100" VerticalAlignment="Center"/>
+                <ComboBox x:Name="IconPlacementBox" Width="140">
+                    <ComboBoxItem>Top</ComboBoxItem>
+                    <ComboBoxItem>Center</ComboBoxItem>
+                    <ComboBoxItem>Bottom</ComboBoxItem>
+                    <ComboBoxItem>Left</ComboBoxItem>
+                    <ComboBoxItem>Right</ComboBoxItem>
+                </ComboBox>
+                <CheckBox x:Name="FreePlacementBox" Content="自由配置" Margin="8,0,0,0" VerticalAlignment="Center" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,4">
                 <TextBlock Text="画像配置:" Width="100" VerticalAlignment="Center"/>

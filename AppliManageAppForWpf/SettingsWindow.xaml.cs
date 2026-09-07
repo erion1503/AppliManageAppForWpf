@@ -30,11 +30,14 @@ namespace AppliManageAppForWpf
         public string ResultBackgroundImagePath { get; private set; }
         public double ResultIconSize { get; private set; }
         public bool ResultListMode { get; private set; }
+        public string ResultIconPlacement { get; private set; }
+        public bool ResultFreePlacement { get; private set; }
 
         public SettingsWindow(double currentWidth, double currentHeight, string currentColor, string currentShape = "Pentagon", string currentText = "", string currentTextColor = "#FFFFFFFF",
             string currentFontName = null, double currentFontSize = 18, string currentTextPosition = "Center", double currentBackgroundOpacity = 1.0,
             string currentBackgroundImagePath = null, double currentIconSize = 48, bool currentListMode = false, string currentImageMode = "Fill",
-            bool currentTextShadow = false, string currentTextShadowColor = "#66000000", double currentLineSpacing = 0, bool currentFontBold = false, bool currentFontItalic = false)
+            bool currentTextShadow = false, string currentTextShadowColor = "#66000000", double currentLineSpacing = 0, bool currentFontBold = false, bool currentFontItalic = false,
+            string currentIconPlacement = "Center", bool currentFreePlacement = false)
         {
             InitializeComponent();
             WidthBox.Text = ((int)currentWidth).ToString();
@@ -90,6 +93,16 @@ namespace AppliManageAppForWpf
             if (italicBoxInit != null) italicBoxInit.IsChecked = currentFontItalic;
             var listModeBoxInit = this.FindName("ListModeBox") as CheckBox;
             if (listModeBoxInit != null) listModeBoxInit.IsChecked = currentListMode;
+            var iconPlacementBoxInit = this.FindName("IconPlacementBox") as ComboBox;
+            if (iconPlacementBoxInit != null)
+            {
+                foreach (ComboBoxItem it in iconPlacementBoxInit.Items)
+                {
+                    if (string.Equals((it.Content ?? "").ToString(), currentIconPlacement, StringComparison.OrdinalIgnoreCase)) { iconPlacementBoxInit.SelectedItem = it; break; }
+                }
+            }
+            var freePlacementBoxInit = this.FindName("FreePlacementBox") as CheckBox;
+            if (freePlacementBoxInit != null) freePlacementBoxInit.IsChecked = currentFreePlacement;
 
             // attach change handlers to update preview (use FindName to avoid compile-time field dependencies)
             var widthBox = this.FindName("WidthBox") as TextBox; if (widthBox != null) widthBox.TextChanged += (s, e) => UpdatePreview();
@@ -108,6 +121,8 @@ namespace AppliManageAppForWpf
             var previewFont = this.FindName("PreviewFontSizeSlider") as System.Windows.Controls.Slider; if (previewFont != null) previewFont.ValueChanged += (s, e) => { var fb = this.FindName("FontSizeBox") as TextBox; if (fb != null) fb.Text = ((int)previewFont.Value).ToString(); UpdatePreview(); };
             var previewOpacity = this.FindName("PreviewOpacitySlider") as System.Windows.Controls.Slider; if (previewOpacity != null) previewOpacity.ValueChanged += (s, e) => { var ob = this.FindName("OpacityBox") as TextBox; if (ob != null) ob.Text = previewOpacity.Value.ToString("F2"); UpdatePreview(); };
             var previewIcon = this.FindName("PreviewIconSizeSlider") as System.Windows.Controls.Slider; if (previewIcon != null) previewIcon.ValueChanged += (s, e) => { var ib = this.FindName("IconSizeBox") as TextBox; if (ib != null) ib.Text = ((int)previewIcon.Value).ToString(); PreviewIconSizeChanged(); };
+            var iconPlacementBox = this.FindName("IconPlacementBox") as ComboBox; if (iconPlacementBox != null) iconPlacementBox.SelectionChanged += (s, e) => UpdatePreview();
+            var freePlacementBox = this.FindName("FreePlacementBox") as CheckBox; if (freePlacementBox != null) freePlacementBox.Checked += (s, e) => UpdatePreview(); if (freePlacementBox != null) freePlacementBox.Unchecked += (s, e) => UpdatePreview();
 
             UpdatePreview();
         }
@@ -266,6 +281,7 @@ namespace AppliManageAppForWpf
             // position
             var pos = (TextPosBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Center";
             switch (pos.ToLowerInvariant()) { case "top": PreviewTextPanel.VerticalAlignment = VerticalAlignment.Top; break; case "bottom": PreviewTextPanel.VerticalAlignment = VerticalAlignment.Bottom; break; default: PreviewTextPanel.VerticalAlignment = VerticalAlignment.Center; break; }
+
         }
     }
 }
