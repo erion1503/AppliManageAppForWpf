@@ -1,0 +1,130 @@
+<Window x:Class="AppliManageAppForWpf.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="設定" Height="520" Width="715" WindowStartupLocation="CenterOwner" ResizeMode="CanResize">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0">
+            <StackPanel Orientation="Horizontal" Margin="0,4">
+                <TextBlock Text="幅:" Width="60" VerticalAlignment="Center"/>
+                <TextBox x:Name="WidthBox" Width="150" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,4">
+                <TextBlock Text="高さ:" Width="60" VerticalAlignment="Center"/>
+                <TextBox x:Name="HeightBox" Width="150" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,4">
+                <TextBlock Text="背景色(#AARRGGBB):" Width="140" VerticalAlignment="Center"/>
+                <TextBox x:Name="ColorBox" Width="180" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,4">
+                <TextBlock Text="形状:" Width="60" VerticalAlignment="Center"/>
+                <ComboBox x:Name="ShapeBox" Width="160">
+                    <ComboBoxItem>Rectangle</ComboBoxItem>
+                    <ComboBoxItem>Ellipse</ComboBoxItem>
+                    <ComboBoxItem>Pentagon</ComboBoxItem>
+                    <ComboBoxItem>Hexagon</ComboBoxItem>
+                </ComboBox>
+                <TextBlock Text="文字色:" Width="60" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                <TextBox x:Name="TextColorBox" Width="80" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,4">
+                <TextBlock Text="フォント:" Width="60" VerticalAlignment="Center"/>
+                <ComboBox x:Name="FontBox" Width="200" IsEditable="True" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,4">
+                <TextBlock Text="フォントサイズ:" Width="60" VerticalAlignment="Center"/>
+                <TextBox x:Name="FontSizeBox" Width="80" />
+                <TextBlock Text="位置:" Width="40" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                <ComboBox x:Name="TextPosBox" Width="100">
+                    <ComboBoxItem>Top</ComboBoxItem>
+                    <ComboBoxItem>Center</ComboBoxItem>
+                    <ComboBoxItem>Bottom</ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,4">
+                <TextBlock Text="透過度(0-1):" Width="100" VerticalAlignment="Center"/>
+                <TextBox x:Name="OpacityBox" Width="60" />
+                <TextBlock Text="アイコンサイズ:" Width="90" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                <TextBox x:Name="IconSizeBox" Width="60" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,4">
+                <TextBlock Text="画像配置:" Width="100" VerticalAlignment="Center"/>
+                <ComboBox x:Name="ImageModeBox" Width="140">
+                    <ComboBoxItem>Fill</ComboBoxItem>
+                    <ComboBoxItem>Fit</ComboBoxItem>
+                    <ComboBoxItem>Tile</ComboBoxItem>
+                </ComboBox>
+                <TextBlock Text="影:" Width="40" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                <CheckBox x:Name="TextShadowBox" VerticalAlignment="Center" />
+                <TextBlock Text="影色:" Width="50" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                <TextBox x:Name="ShadowColorBox" Width="80" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,4">
+                <TextBlock Text="背景画像:" Width="60" VerticalAlignment="Center"/>
+                <TextBox x:Name="BgImageBox" Width="240" />
+                <Button Width="40" Margin="6,0,0,0" Click="BrowseImage_Click">参照</Button>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,4">
+                <CheckBox x:Name="ListModeBox" Content="リスト表示" />
+            </StackPanel>
+
+            <TextBlock Text="背景テキスト（複数行）。改行で区切ってください:" Margin="0,8,0,4"/>
+            <TextBox x:Name="MultiTextBox" AcceptsReturn="True" Height="100" TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" Margin="0,4">
+                <TextBlock Text="行間:" Width="60" VerticalAlignment="Center"/>
+                <TextBox x:Name="LineSpacingBox" Width="80" />
+                <TextBlock Text="太字" Width="40" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                <CheckBox x:Name="BoldBox" VerticalAlignment="Center" />
+                <TextBlock Text="斜体" Width="40" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                <CheckBox x:Name="ItalicBox" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                <Button Width="80" Margin="6,0" Click="Reset_Click">デフォルトに戻す</Button>
+                <Button Width="80" Margin="6,0" Click="Ok_Click">OK</Button>
+                <Button Width="80" Margin="6,0" Click="Cancel_Click">キャンセル</Button>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Preview area -->
+        <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Margin="8" Padding="8" Background="Black">
+            <Grid>
+                <Path x:Name="PreviewShape" Stretch="Fill" Fill="#FF1E88E5" Stroke="#FF0D47A1" StrokeThickness="2" />
+                <StackPanel x:Name="PreviewTextPanel" VerticalAlignment="Center" HorizontalAlignment="Center" IsHitTestVisible="False" />
+                <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Margin="4">
+                    <TextBlock Text="プレビュー用スライダー" Foreground="White" FontSize="12" />
+                    <StackPanel Orientation="Horizontal" Margin="0,4">
+                        <TextBlock Text="フォントサイズ" Foreground="White" Width="80" VerticalAlignment="Center"/>
+                        <Slider x:Name="PreviewFontSizeSlider" Minimum="8" Maximum="72" Width="160" Value="18" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,4">
+                        <TextBlock Text="透過度" Foreground="White" Width="80" VerticalAlignment="Center"/>
+                        <Slider x:Name="PreviewOpacitySlider" Minimum="0" Maximum="1" Width="160" Value="1" TickFrequency="0.05" IsSnapToTickEnabled="False" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,4">
+                        <TextBlock Text="アイコンサイズ" Foreground="White" Width="80" VerticalAlignment="Center"/>
+                        <Slider x:Name="PreviewIconSizeSlider" Minimum="8" Maximum="128" Width="160" Value="48" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+                </Grid>
+        </ScrollViewer>
+
+    </Grid>
+</Window>

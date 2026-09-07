@@ -1,0 +1,88 @@
+﻿<Window x:Class="AppliManageAppForWpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AppliManageAppForWpf"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="600"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="CanResizeWithGrip">
+
+    <Grid AllowDrop="True" Drop="Grid_Drop" DragOver="Grid_DragOver">
+        <Grid.Resources>
+            <sys:Double x:Key="IconSize">48</sys:Double>
+            <DataTemplate x:Key="AppItemTemplate">
+                <Button Click="AppItem_Click" Tag="{Binding Path}" Margin="8" Width="72" Height="88" Background="Transparent" BorderBrush="Transparent"
+                        PreviewMouseLeftButtonDown="AppItem_PreviewMouseLeftButtonDown"
+                        PreviewMouseMove="AppItem_PreviewMouseMove"
+                        AllowDrop="True"
+                        Drop="AppItem_Drop">
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="編集" Click="EditApp_Click" CommandParameter="{Binding}" />
+                            <MenuItem Header="削除" Click="DeleteApp_Click" CommandParameter="{Binding}" />
+                            <Separator />
+                            <MenuItem Header="左へ移動" Click="MoveLeftApp_Click" CommandParameter="{Binding}" />
+                            <MenuItem Header="右へ移動" Click="MoveRightApp_Click" CommandParameter="{Binding}" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                    <StackPanel>
+                        <Image Source="{Binding Icon}" Width="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=IconSize}" Height="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=IconSize}" />
+                        <TextBlock Text="{Binding Name}" Foreground="White" FontSize="12" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="72" />
+                    </StackPanel>
+                </Button>
+            </DataTemplate>
+        </Grid.Resources>
+        <!-- 背景透明の五角形ウィンドウ -->
+        <Path x:Name="Pentagon"
+              Stretch="Fill"
+              Fill="#FF1E88E5"
+              Stroke="#FF0D47A1"
+              StrokeThickness="3"
+              Margin="10"
+              MouseLeftButtonDown="Pentagon_MouseLeftButtonDown">
+            <Path.Effect>
+                <DropShadowEffect Color="#66000000" BlurRadius="12" ShadowDepth="4"/>
+            </Path.Effect>
+            <!-- 単位ボックス(0-100)の五角形。Stretch=Fill でウィンドウに合わせて拡大縮小 -->
+            <Path.Data>
+                <PathGeometry Figures="M50,0 L97.5528,35.3553 L79.3893,90.4508 L20.6107,90.4508 L2.4472,35.3553 Z" />
+            </Path.Data>
+            <Path.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="設定" Click="OpenSettings_Click" />
+                    <MenuItem Header="エクスポート..." Click="ExportSettings_Click" />
+                    <MenuItem Header="インポート..." Click="ImportSettings_Click" />
+                    <Separator />
+                    <MenuItem Header="閉じる" Click="CloseMenuItem_Click"/>
+                </ContextMenu>
+            </Path.ContextMenu>
+        </Path>
+        <!-- アプリ一覧を表示する領域 -->
+        <!-- Grid (wrap) view -->
+        <ItemsControl x:Name="AppList" HorizontalAlignment="Center" VerticalAlignment="Center" ItemTemplate="{StaticResource AppItemTemplate}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+
+        <!-- List (vertical) view -->
+        <ItemsControl x:Name="AppListVertical" HorizontalAlignment="Center" VerticalAlignment="Center" ItemTemplate="{StaticResource AppItemTemplate}" Visibility="Collapsed">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+
+        <!-- 背景テキスト表示 -->
+        <StackPanel x:Name="BackgroundTextPanel" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+
+        <!-- 右下に小さなヒントテキスト -->
+        <TextBlock Text="右クリックでメニュー" Foreground="White" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="16"/>
+    </Grid>
+</Window>
